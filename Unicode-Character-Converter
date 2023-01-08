@@ -1,0 +1,165 @@
+//2023-01-06
+//Author: Alan Zhou
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.Toolkit;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.text.NumberFormat;
+import javax.swing.ButtonGroup;
+import javax.swing.JButton;
+import javax.swing.JFormattedTextField;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JRadioButton;
+import javax.swing.JTextField;
+import javax.swing.JTextPane;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
+import javax.swing.text.NumberFormatter;
+
+public class UnicodeCharacterConverter {
+  public static void main(String[] args) {
+	JFrame frame = new JFrame();
+    Font fontForComponent = new Font("Times New Roman", Font.PLAIN, 23);
+    Font fontForText = new Font("Microsoft Jhenghei", Font.PLAIN, 25);
+    JButton[] button = new JButton[2];
+    JLabel[] label = new JLabel[4];
+    JPanel[] panel = new JPanel[2];
+    JRadioButton[] radioButton = new JRadioButton[2];
+    ButtonGroup buttonGroup = new ButtonGroup();
+    JTextField textField = new JTextField();
+    NumberFormat numberFormat = NumberFormat.getIntegerInstance();
+    numberFormat.setGroupingUsed(false);
+    NumberFormatter numberFormatter = new NumberFormatter(numberFormat);
+    numberFormatter.setAllowsInvalid(false);
+    JFormattedTextField formattedTextField = new JFormattedTextField(numberFormatter);
+    JTextPane[] textPane = new JTextPane[2];
+    for (int i = 0; i < 2; i++) {
+      button[i] = new JButton();
+      button[i].addActionListener(new ActionListener() {
+        public void actionPerformed(ActionEvent e) {
+          if (e.getSource() == button[0]) {
+            textField.setText("");
+            formattedTextField.setValue(null);
+            for (int i = 0; i < 2; i++) {
+              textPane[i].setText("");
+            }
+          } else {
+            try {
+              if (textField.isEnabled()) {
+                String textString = textField.getText();
+                for (int i = 0; i < textString.length(); i++) {
+                  Integer[] textString_toInteger = new Integer[textString.length()];
+                  textString_toInteger[i] = textString.codePointAt(i);
+                  String textString_toInteger_toString = textString_toInteger[i].toString();
+                  textPane[0].setText(textString_toInteger_toString);
+                }
+              } else if (formattedTextField.isEnabled()) {
+                String ASCII_String = formattedTextField.getText();
+                Integer ASCII_String_toInteger = Integer.parseInt(ASCII_String);
+                textPane[1].setText(String.valueOf(Character.toChars(ASCII_String_toInteger)));
+              }
+            } catch (IllegalArgumentException ex) {
+              JOptionPane.showMessageDialog(null, "An error occurred. Please try again.", "Error", JOptionPane.ERROR_MESSAGE);
+            }
+          }
+        }
+      });
+      button[i].setFocusable(false);
+      button[i].setFont(fontForComponent);
+      frame.add(button[i]);
+      radioButton[i] = new JRadioButton();
+      radioButton[i].addActionListener(new ActionListener() {
+        public void actionPerformed(ActionEvent e) {
+          if (e.getSource() == radioButton[0]) {
+            textField.setEnabled(true);
+            formattedTextField.setEnabled(false);
+          } else {
+            formattedTextField.setEnabled(true);
+            textField.setEnabled(false);
+          }
+        }
+      }); 
+      radioButton[i].setFocusable(false);
+      radioButton[i].setFont(fontForComponent);
+      buttonGroup.add(radioButton[i]);
+      textPane[i] = new JTextPane();
+      textPane[i].setBackground(Color.LIGHT_GRAY);
+      textPane[i].setEditable(false);
+      textPane[i].setFont(fontForText);
+      textPane[i].setPreferredSize(new Dimension(300, 40));
+      panel[i] = new JPanel();
+      panel[i].add(radioButton[i]);
+      frame.add(panel[i]);
+    }
+    button[0].setBounds(100, 500, 200, 60);
+    button[1].setBounds(300, 500, 200, 60);
+    button[0].setText("CLEAR");
+    button[1].setText("CONVERT");
+    for (int i = 0; i < 4; i++) {
+        label[i] = new JLabel();
+        label[i].setFont(fontForComponent);
+        frame.add(label[i]);
+      }
+    label[0].setBounds(50, 100, 200, 30);
+    label[1].setBounds(50, 130, 200, 60);
+    label[2].setBounds(50, 340, 200, 60);
+    label[3].setBounds(50, 400, 200, 30);
+    label[0].setText("Character");
+    label[1].setText("<html>Unicode<br/> Decimal<html>");
+    label[2].setText("<html>Unicode<br/> Decimal<html>");
+    label[3].setText("Character");
+    radioButton[0].setSelected(true);
+    radioButton[0].setText("Char to Code");
+    radioButton[1].setText("Code to Char"); 
+    textField.getDocument().addDocumentListener(new DocumentListener() {
+      @Override
+      public void insertUpdate(DocumentEvent e) {
+        if (textField.getText().length() > 1) {
+          JOptionPane.showMessageDialog(null, "An error occurred. Please try again.", "Error", JOptionPane.ERROR_MESSAGE);
+        }
+      }
+      @Override
+      public void removeUpdate(DocumentEvent e) {}
+      @Override
+      public void changedUpdate(DocumentEvent e) {}
+    });
+    textField.addKeyListener(new KeyAdapter() {
+      public void keyTyped(KeyEvent e) {
+        if (textField.getText().length() > 0) {
+          e.consume();
+        }
+      }
+    });
+    textField.setFont(fontForText);
+    textField.setPreferredSize(new Dimension(300, 40));
+    formattedTextField.addKeyListener(new KeyAdapter() {
+      public void keyTyped(KeyEvent e) {
+        if (formattedTextField.getText().length() > 5) {
+          e.consume();
+        }
+      }
+    });
+    formattedTextField.setEnabled(false);
+    formattedTextField.setFont(fontForText);
+    formattedTextField.setPreferredSize(new Dimension(300, 40)); 
+    panel[0].add(textField);
+    panel[0].add(textPane[0]);
+    panel[1].add(formattedTextField);
+    panel[1].add(textPane[1]);
+    panel[0].setBounds(150, 50, 380, 200);
+    panel[1].setBounds(150, 300, 380, 200);
+    frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    frame.setLayout(null);
+    frame.setResizable(false);
+    frame.setSize(600, 600);
+    frame.setTitle("Unicode Character Converter");
+    frame.setVisible(true);
+  }
+}
